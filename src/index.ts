@@ -59,20 +59,37 @@ try {
 } catch (e) {
     // cannot find repos config locally
     console.log("Unable to read repos config locally, sync with remote.")
-    await syncWithRemote()
+    await syncWithRemote(diff())
     process.exit()
 }
 let localTimestamp = Number(reposFromDisk.get("timestamp"))
 if (!localTimestamp || remoteTimestamp > localTimestamp) {
     // remote is newer
     console.log("Remote is newer, sync with remote.")
-    await syncWithRemote()
+    await syncWithRemote(diff())
     process.exit()
 }
 
-await updateFromLocal()
+// other conflicts
+// ask user which to use
+let actions = diff()
+if (actions.length == 0) {
+    console.log("No actions needed.")
+    process.exit()
+}
+let scanner = readline.createInterface(process.stdin, process.stdout)
+console.log(`Remote: ${Object.keys(reposFromGist).length - 1} repos at ${new Date(remoteTimestamp)}`)
+console.log(`Local:  ${localRepos.size - 1} repos at ${new Date(localTimestamp)}`)
+let input = await scanner.question("Which one do you prefer? ([R]emote,[L]ocal)")
+scanner.close()
+if (input.toLowerCase() == "r") {
+    await syncWithRemote(actions)
+} else if (input.toLowerCase() == "l") {
+    await updateFromLocal()
+}
 
-async function syncWithRemote() {
+
+function diff(): Array<Actions> {
     let actions = Array<Actions>()
     for (let dir of Object.keys(reposFromGist)) {
         if (dir === "timestamp") continue
@@ -96,6 +113,10 @@ async function syncWithRemote() {
             actions.push(new DeleteRepoAction(dir))
         }
     }
+    return actions
+}
+
+async function syncWithRemote(actions: Array<Actions>) {
     if (actions.length == 0) {
         console.log("No action need.")
         process.exit()

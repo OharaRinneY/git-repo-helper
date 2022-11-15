@@ -70,7 +70,7 @@ export class DeleteRepoAction extends Actions {
         let realPath = path.join(this.rootDir, this.repoDir)
         let paths = realPath.split(path.sep)
         paths[paths.length - 1] = `.${paths[paths.length - 1]}`
-        await fs.rename(realPath, path.join(...paths))
+        await fs.rename(realPath, "/" + path.join(...paths))
     }
 
 }
