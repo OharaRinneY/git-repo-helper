@@ -1,3 +1,0 @@
-interface Config {
-    syncDir: string,
-}
