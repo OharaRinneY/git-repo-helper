@@ -10,6 +10,7 @@ export class Repos {
 
     constructor(dir: string) {
         this.rootDir = dir
+        this.repos.set("timestamp", String(new Date().valueOf()))
     }
 
     async init() {
@@ -30,11 +31,11 @@ export class Repos {
             try {
                 url = await execAsync("git config --get remote.origin.url", dir)
             } catch (e) {
-                // console.log(`${e} is not a remote repo`)
+                // not a remote repo
                 return
             }
             this.repos.set(dir, url)
-            // console.log(`${dir} -> ${url}`)
+            return
         }
         // recursion
         for (let subDir of subDirs) {

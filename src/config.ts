@@ -4,6 +4,8 @@ import {mapToObj} from "./utils.js"
 
 export const config = new Map<string, string>([
         ["syncDir", ""],
+        ["token", ""],
+        ["gistId", ""]
     ]
 )
 

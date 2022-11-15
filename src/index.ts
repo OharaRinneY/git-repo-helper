@@ -6,6 +6,7 @@ import path from "path"
 import {readConfigFromConsole, readMapFromFile, writeMapToFile, writeStringToFile} from "./config.js"
 import {Repos} from "./repo.js"
 import {exit, mapToObj} from "./utils.js"
+import {updateRepo} from "./gists.js"
 
 const configDir = path.join(os.homedir(), ".git-repo-helper")
 
@@ -38,3 +39,6 @@ console.log(`found ${repos.repoCount} repos, of which ${repos.repos.size} is rem
 // save repo
 let reposObj = mapToObj(repos.repos)
 await writeStringToFile(repoPath, JSON.stringify(reposObj))
+
+// update repo
+let res = await updateRepo(JSON.stringify(reposObj), config.get("gistId") ?? exit(""), config.get("token") ?? exit(""))
