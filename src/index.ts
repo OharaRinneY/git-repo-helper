@@ -3,7 +3,7 @@
 import * as fs from "fs/promises"
 import * as os from "os"
 import path from "path"
-import {readConfigFromConsole, writeConfigToFile} from "./config.js"
+import {readConfigFromConsole, readConfigFromFile, writeConfigToFile} from "./config.js"
 
 const configDir = path.join(os.homedir(), ".git-repo-helper")
 
@@ -23,11 +23,11 @@ if (dir === undefined) {
 }
 
 let configPath = path.join(dir.path, "config.json")
-let file = await fs.open(configPath,'r').catch(async e => {
-    if (e.errno == -2) {
-        let config = await readConfigFromConsole()
-        await writeConfigToFile(configPath, config)
-    }
+let config = await readConfigFromFile(configPath).catch(async () => {
+    console.log("unable to read config from file")
+    let config = await readConfigFromConsole()
+    await writeConfigToFile(configPath, config)
+    return config
 })
 
 

@@ -23,3 +23,12 @@ export async function writeConfigToFile(path: string, config: Map<string, string
     config.forEach((v, k) => obj[k] = v)
     await file.writeFile(JSON.stringify(obj))
 }
+
+export async function readConfigFromFile(path: string): Promise<Map<string, string>> {
+    let configString = await fs.readFile(path, "utf-8")
+    let configObj = JSON.parse(configString)
+    for (let key of config.keys()) {
+        config.set(key, configObj[key])
+    }
+    return config
+}
