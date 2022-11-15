@@ -1,0 +1,20 @@
+{
+  "name": "git-repo-helper",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "author": "Rinne",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "git-repo-helper": "./dist/index.js"
+  },
+  "scripts": {
+    "run": "yarn build && node ./dist/index.js",
+    "build": "npx tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "nodemon": "^2.0.20"
+  }
+}
