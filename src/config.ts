@@ -23,7 +23,7 @@ export async function writeMapToFile(path: string, map: Map<string, string>) {
     await writeStringToFile(path, JSON.stringify(mapToObj(map)))
 }
 
-export async function readMapFromFile(path: string): Promise<Map<string, string>> {
+export async function readConfigFromFile(path: string): Promise<Map<string, string>> {
     let configString = await fs.readFile(path, "utf-8")
     let configObj = JSON.parse(configString)
     for (let key of config.keys()) {
@@ -36,4 +36,14 @@ export async function writeStringToFile(path: string, content: string) {
     let file = await fs.open(path, "w")
     await file.writeFile(content)
     await file.close()
+}
+
+export async function readMapFromFile(path: string): Promise<Map<string, string>> {
+    let str = await fs.readFile(path, "utf-8")
+    let obj = JSON.parse(str)
+    let map = new Map<string,string>()
+    for (let key of Object.keys(obj)) {
+        map.set(key, obj[key])
+    }
+    return map
 }

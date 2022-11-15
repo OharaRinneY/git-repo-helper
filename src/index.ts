@@ -3,7 +3,13 @@
 import * as fs from "fs/promises"
 import * as os from "os"
 import path from "path"
-import {readConfigFromConsole, readMapFromFile, writeMapToFile, writeStringToFile} from "./config.js"
+import {
+    readConfigFromConsole,
+    readConfigFromFile,
+    readMapFromFile,
+    writeMapToFile,
+    writeStringToFile
+} from "./config.js"
 import {Repos} from "./repo.js"
 import {exit, mapToObj} from "./utils.js"
 import {fetchRepo, updateRepo} from "./gists.js"
@@ -27,7 +33,7 @@ if (dir === undefined) {
 const configPath = path.join(dir.path, "config.json")
 const repoPath = path.join(dir.path, "repos.json")
 
-let config = await readMapFromFile(configPath).catch(async () => {
+let config = await readConfigFromFile(configPath).catch(async () => {
     console.log("unable to read config from file")
     let config = await readConfigFromConsole()
     await writeMapToFile(configPath, config)
@@ -44,7 +50,7 @@ if (!remoteTimestamp) exit("No remoteTimestamp in repos from gist")
 // search repos on disk
 let repos = new Repos(config.get("syncDir") ?? exit("config parse error"))
 await repos.init()
-console.log(`found ${repos.repoCount} repos, of which ${repos.repos.size} is remote repo.`)
+console.log(`found ${repos.repoCount} repos, ${repos.repos.size - 1} of which are remote repo.`)
 let localRepos = repos.repos
 // read repos config from disk
 let reposFromDisk: Map<string, string>
@@ -56,8 +62,8 @@ try {
     await syncWithRemote()
     process.exit()
 }
-let localeTimestamp = Number(reposFromDisk.get("timestamp"))
-if (!localeTimestamp || remoteTimestamp > localeTimestamp) {
+let localTimestamp = Number(reposFromDisk.get("timestamp"))
+if (!localTimestamp || remoteTimestamp > localTimestamp) {
     // remote is newer
     console.log("Remote is newer, sync with remote.")
     await syncWithRemote()
@@ -104,7 +110,7 @@ async function syncWithRemote() {
     scanner.close()
     if (input.toLowerCase() == 'y') {
         for (let action of actions) {
-            action.invoke()
+            await action.invoke()
         }
         // update local config
         reposFromGist["timestamp"] = String(new Date().valueOf())
