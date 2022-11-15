@@ -4,10 +4,10 @@ import * as fs from "fs/promises"
 import * as os from "os"
 import path from "path"
 import {readConfigFromConsole, readConfigFromFile, writeConfigToFile} from "./config.js"
+import {Repos} from "./repo.js"
+import {exit} from "./utils.js"
 
 const configDir = path.join(os.homedir(), ".git-repo-helper")
-
-console.log("reading config")
 
 let dir = await fs.opendir(configDir).catch(async e => {
     if (e.errno == -2) {
@@ -18,8 +18,7 @@ let dir = await fs.opendir(configDir).catch(async e => {
 })
 
 if (dir === undefined) {
-    console.log("error: dir is undefined")
-    process.exit(-1)
+    exit("error: dir is undefined")
 }
 
 let configPath = path.join(dir.path, "config.json")
@@ -29,5 +28,8 @@ let config = await readConfigFromFile(configPath).catch(async () => {
     await writeConfigToFile(configPath, config)
     return config
 })
-
+// search repos
+let repos = new Repos(config.get("syncDir") ?? exit("config parse error"))
+await repos.init()
+console.log(`found ${repos.repoCount} repos, of which ${repos.repos.size} is remote repo.`)
 
