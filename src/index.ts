@@ -41,4 +41,5 @@ let reposObj = mapToObj(repos.repos)
 await writeStringToFile(repoPath, JSON.stringify(reposObj))
 
 // update repo
-let res = await updateRepo(JSON.stringify(reposObj), config.get("gistId") ?? exit(""), config.get("token") ?? exit(""))
+await updateRepo(JSON.stringify(reposObj), config.get("gistId") ?? exit(""), config.get("token") ?? exit(""))
+console.log("repo updated")

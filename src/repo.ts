@@ -34,7 +34,7 @@ export class Repos {
                 // not a remote repo
                 return
             }
-            this.repos.set(dir, url)
+            this.repos.set(dir.substring(this.rootDir.length + 1), url)
             return
         }
         // recursion
