@@ -1,7 +1,8 @@
 import * as readline from "readline/promises"
 import * as fs from "fs/promises"
+import {mapToObj} from "./utils.js"
 
-const config = new Map<string, string>([
+export const config = new Map<string, string>([
         ["syncDir", ""],
     ]
 )
@@ -16,19 +17,21 @@ export async function readConfigFromConsole(): Promise<Map<string, string>> {
     return config
 }
 
-export async function writeConfigToFile(path: string, config: Map<string, string>) {
-    let file = await fs.open(path, "w")
-    const obj = {}
-    // @ts-ignore
-    config.forEach((v, k) => obj[k] = v)
-    await file.writeFile(JSON.stringify(obj))
+export async function writeMapToFile(path: string, map: Map<string, string>) {
+    await writeStringToFile(path, JSON.stringify(mapToObj(map)))
 }
 
-export async function readConfigFromFile(path: string): Promise<Map<string, string>> {
+export async function readMapFromFile(path: string): Promise<Map<string, string>> {
     let configString = await fs.readFile(path, "utf-8")
     let configObj = JSON.parse(configString)
     for (let key of config.keys()) {
         config.set(key, configObj[key])
     }
     return config
+}
+
+export async function writeStringToFile(path: string, content: string) {
+    let file = await fs.open(path, "w")
+    await file.writeFile(content)
+    await file.close()
 }

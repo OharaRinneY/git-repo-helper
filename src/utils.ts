@@ -15,3 +15,10 @@ export async function execAsync(cmd: string, cwd: string): Promise<string> {
         })
     })
 }
+
+export function mapToObj(map: Map<string, string>): any {
+    const obj = {}
+    // @ts-ignore
+    map.forEach((v, k) => obj[k] = v)
+    return obj
+}
