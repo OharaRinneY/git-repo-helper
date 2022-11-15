@@ -1,9 +1,16 @@
+import {config} from "./config.js"
+import * as fs from "fs/promises"
+import path from "path"
+import {execAsync} from "./utils.js"
+
 export abstract class Actions {
     abstract description: string
     abstract repoDir: string
+    rootDir: string = config.get("syncDir")!!
 
-    abstract invoke(): string
+    abstract invoke(): Promise<void>
 }
+
 
 export class CreateRepoAction extends Actions {
     description: string
@@ -17,8 +24,15 @@ export class CreateRepoAction extends Actions {
         this.description = `create ${repoDir} -> ${url}`
     }
 
-    invoke(): string {
-        return ""
+    async invoke(): Promise<void> {
+        // mkdir
+        let realPath = path.join(this.rootDir, this.repoDir)
+        await fs.mkdir(realPath, {recursive: true})
+        // init git repo
+        await execAsync("git init", realPath)
+        // set remote
+        await execAsync(`git remote add origin ${this.url}`, realPath)
+
     }
 }
 
@@ -34,8 +48,10 @@ export class UpdateRepoAction extends Actions {
         this.description = `update ${repoDir} from ${origin} to ${newUrl}`
     }
 
-    invoke(): string {
-        return ""
+    async invoke(): Promise<void> {
+        let realPath = path.join(this.rootDir, this.repoDir)
+        await execAsync("git remote rm origin", realPath)
+        await execAsync(`git remote add origin ${this.newUrl}`, realPath)
     }
 }
 
@@ -50,8 +66,11 @@ export class DeleteRepoAction extends Actions {
         this.description = `DELETE ${repoDir}`
     }
 
-    invoke(): string {
-        return ""
+    async invoke(): Promise<void> {
+        let realPath = path.join(this.rootDir, this.repoDir)
+        let paths = realPath.split(path.sep)
+        paths[paths.length - 1] = `.${paths[paths.length - 1]}`
+        await fs.rename(realPath, path.join(...paths))
     }
 
 }
