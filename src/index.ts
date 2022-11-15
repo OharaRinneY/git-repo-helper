@@ -39,19 +39,26 @@ let config = await readConfigFromFile(configPath).catch(async () => {
     await writeMapToFile(configPath, config)
     return config
 })
-
-// fetch repos config from gist
-let res = await fetchRepo(config.get("gistId") ?? exit(""), config.get("token") ?? exit(""))
-// @ts-ignore
-let reposFromGist = JSON.parse(res.files["repo.json"].content)
-let remoteTimestamp = Number(reposFromGist["timestamp"])
-if (!remoteTimestamp) exit("No remoteTimestamp in repos from gist")
-
 // search repos on disk
 let repos = new Repos(config.get("syncDir") ?? exit("config parse error"))
 await repos.init()
 console.log(`found ${repos.repoCount} repos, ${repos.repos.size - 1} of which are remote repo.`)
 let localRepos = repos.repos
+// fetch repos config from gist
+let remoteTimestamp: number
+let reposFromGist: any
+try {
+    let res = await fetchRepo(config.get("gistId") ?? exit(""), config.get("token") ?? exit(""))
+    // @ts-ignore
+    reposFromGist = JSON.parse(res.files["repo.json"].content)
+    remoteTimestamp = Number(reposFromGist["timestamp"])
+    if (!reposFromGist || !remoteTimestamp) await updateFromLocal()
+} catch (e) {
+    // use local
+    await updateFromLocal()
+    process.exit()
+}
+
 // read repos config from disk
 let reposFromDisk: Map<string, string>
 try {
